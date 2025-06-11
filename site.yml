@@ -1,0 +1,13 @@
+- name: Provision Rocky Linux server
+  hosts: localhost
+  become: yes
+  vars_files:
+    - vars.yml  # Optional, only if you're using it
+  roles:
+    - common
+
+- name: Apply database server configuration
+  hosts: localhost
+  become: yes
+  roles:
+    - { role: dbserver, when: "'db' in ansible_local.tags" }

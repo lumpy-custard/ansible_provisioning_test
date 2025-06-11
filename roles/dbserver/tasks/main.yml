@@ -1,0 +1,33 @@
+- name: Install Databases
+  dnf:
+    name:
+      - mongodb-server
+      - mysql
+    state: present
+
+
+- name: Create MySQL database user
+  mysql_user:
+    name: lukas
+    password: 
+    priv: '*.*:ALL'
+    host: "%"
+    state: present
+
+- name: Enable and start Databases
+  systemd:
+    name: 
+      - mongod
+      - mysql
+    enabled: yes
+    state: started
+
+- name: Create MongoDB admin user
+  community.mongodb.mongodb_user:
+    login_host: localhost
+    login_port: 27017
+    name: dbuser
+    password: dbpass123
+    roles: ['readWriteAnyDatabase', 'dbAdminAnyDatabase']
+    database: admin
+    state: present

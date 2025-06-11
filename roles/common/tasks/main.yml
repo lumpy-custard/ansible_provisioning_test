@@ -1,25 +1,23 @@
----
-- name: Provision Rocky Linux server
-  hosts: localhost
-  become: yes
-  vars_files:
-    - vars.yml
+    - name: Set timezone
+      timezone:
+        name: Australia/Brisbane
 
-  tasks:
-    - name: Install essential packages
+    - name: Ensure required packages are installed
       dnf:
         name:
           - nano
+          - curl
           - openssh-server
           - epel-release
+
         state: present
 
     - name: Start and enable sshd
       systemd:
-        name: sshd
-        state: started
-        enabled: yes
-
+          name: sshd
+          state: started
+          enabled: yes
+    
     - name: Ensure new user exists
       user:
         name: "{{ new_user }}"
@@ -43,11 +41,7 @@
       systemd:
         name: sshd
         state: restarted
-    
-    - name: Install EPEL 
-      dnf:
-       name: epel-release
-          
+
     - name: Download latest Neofetch script from GitHub
       get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
@@ -147,10 +141,3 @@
         name: ansible-pull.timer
         enabled: yes
         state: started
-
-
-
-    - name: Write timestamped test file to confirm cron job runs
-      copy:
-        content: "systemd ran at {{ ansible_date_time.iso8601 }}"
-        dest: /opt/ansible-provision/cron_test.txt
