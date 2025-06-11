@@ -89,13 +89,26 @@
         group: ansible
         mode: '0755'
 
+    - name: Ensure ansible-pull log file exists in home dir
+      file:
+        path: /home/ansible/ansible-pull.log
+        state: touch
+        owner: ansible
+        group: ansible
+        mode: '0644'
+
     - name: Create cronjob to run ansible-pull every 5 minutes
       cron:
         name: "Ansible Pull"
         user: ansible
         minute: "*/5"
         job: >
-          /usr/bin/ansible-pull -U https://github.com/your-username/Ansible_Provisioning_Test.git
+          /usr/bin/ansible-pull -U https://github.com/lumpy-custard/Ansible_Provisioning_Test.git
           -d /opt/ansible-provision
           -i localhost,
-          provision_rocky/playbook.yml >> /var/log/ansible-pull.log 2>&1
+          provision_rocky/playbook.yml >> /home/ansible/ansible-pull.log 2>&1
+
+    - name: Add /opt/ansible-provision as a safe Git directory for ansible user
+      become: true
+      become_user: ansible
+      command: git config --global --add safe.directory /opt/ansible-provision
