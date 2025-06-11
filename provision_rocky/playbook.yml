@@ -101,16 +101,51 @@
         group: ansible
         mode: '0644'
 
-    - name: Create cronjob to run ansible-pull every 5 minutes
-      cron:
-        name: "Ansible Pull"
-        user: ansible
-        minute: "*/5"
-        job: >
-          /usr/bin/ansible-pull -U https://github.com/lumpy-custard/Ansible_Provisioning_Test.git
-          -d /opt/ansible-provision
-          -i localhost,
-          provision_rocky/playbook.yml >> /opt/ansible-provision/ansible-pull.log 2>&1
+    - name: Set timezone to Australia/Brisbane
+      timezone:
+        name: Australia/Brisbane
+
+    - name: Create ansible-pull systemd service
+      copy:
+        dest: /etc/systemd/system/ansible-pull.service
+        content: |
+          [Unit]
+          Description=Ansible Pull Configuration
+          After=network.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/bin/ansible-pull --force -U https://github.com/lumpy-custard/Ansible_Provisioning_Test.git -d /opt/ansible-provision -i localhost, provision_rocky/playbook.yml
+          WorkingDirectory=/opt/ansible-provision
+          StandardOutput=append:/opt/ansible-provision/ansible-pull.log
+          StandardError=append:/opt/ansible-provision/ansible-pull.log
+
+    - name: Create ansible-pull systemd timer
+      copy:
+        dest: /etc/systemd/system/ansible-pull.timer
+        content: |
+          [Unit]
+          Description=Run ansible-pull every 5 minutes
+
+          [Timer]
+          OnBootSec=2min
+          OnUnitActiveSec=5min
+          Unit=ansible-pull.service
+
+          [Install]
+          WantedBy=timers.target
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start ansible-pull timer
+      systemd:
+        name: ansible-pull.timer
+        enabled: yes
+        state: started
+
+
 
     - name: Write timestamped test file to confirm cron job runs
       copy:
