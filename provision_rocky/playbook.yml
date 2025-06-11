@@ -1,0 +1,59 @@
+---
+- name: Provision Rocky Linux server
+  hosts: localhost
+  become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Install essential packages
+      dnf:
+        name:
+          - nano
+          - openssh-server
+          - epel-release
+        state: present
+
+    - name: Start and enable sshd
+      systemd:
+        name: sshd
+        state: started
+        enabled: yes
+
+    - name: Ensure new user exists
+      user:
+        name: "{{ new_user }}"
+        groups: wheel
+        append: yes
+        create_home: yes
+
+    - name: Set password for new user
+      ansible.builtin.command: "echo '{{ new_user }}:changeme' | chpasswd"
+      no_log: true
+
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin\s+.*'
+        line: 'PermitRootLogin no'
+        state: present
+        backup: yes
+
+    - name: Restart SSH service
+      systemd:
+        name: sshd
+        state: restarted
+
+    - name: Install Neofetch
+      dnf:
+        name: neofetch
+        state: present
+
+    - name: Ensure Neofetch runs on login for new user
+      lineinfile:
+        path: "/home/{{ new_user }}/.bashrc"
+        line: "neofetch"
+        create: yes
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: '0644'
