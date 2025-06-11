@@ -47,12 +47,7 @@
     - name: Install EPEL 
       dnf:
        name: epel-release
-        
-    - name: Install Neofetch
-      dnf:
-        name: neofetch
-        state: latest
-    
+          
     - name: Download latest Neofetch script from GitHub
       get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
