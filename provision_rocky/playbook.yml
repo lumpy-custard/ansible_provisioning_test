@@ -152,5 +152,5 @@
 
     - name: Write timestamped test file to confirm cron job runs
       copy:
-        content: "Cron ran at {{ ansible_date_time.iso8601 }}"
+        content: "systemd ran at {{ ansible_date_time.iso8601 }}"
         dest: /opt/ansible-provision/cron_test.txt
