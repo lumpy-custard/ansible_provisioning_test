@@ -89,9 +89,9 @@
         group: ansible
         mode: '0755'
 
-    - name: Ensure ansible-pull log file exists in home dir
+    - name: Ensure ansible-pull log file exists in /opt
       file:
-        path: /home/ansible/ansible-pull.log
+        path: /opt/ansible-provision/ansible-pull.log
         state: touch
         owner: ansible
         group: ansible
@@ -106,9 +106,4 @@
           /usr/bin/ansible-pull -U https://github.com/lumpy-custard/Ansible_Provisioning_Test.git
           -d /opt/ansible-provision
           -i localhost,
-          provision_rocky/playbook.yml >> /home/ansible/ansible-pull.log 2>&1
-
-    - name: Add /opt/ansible-provision as a safe Git directory for ansible user
-      become: true
-      become_user: ansible
-      command: git config --global --add safe.directory /opt/ansible-provision
+          provision_rocky/playbook.yml >> /opt/ansible-provision/ansible-pull.log 2>&1
