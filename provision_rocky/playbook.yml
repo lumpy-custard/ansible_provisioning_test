@@ -47,7 +47,6 @@
     - name: Install EPEL 
       dnf:
        name: epel-release
-        state: latest
         
     - name: Install Neofetch
       dnf:
