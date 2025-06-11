@@ -105,20 +105,23 @@
       timezone:
         name: Australia/Brisbane
 
-    - name: Create ansible-pull systemd service
+    - name: Create ansible-pull systemd service (run as ansible)
       copy:
         dest: /etc/systemd/system/ansible-pull.service
         content: |
           [Unit]
-          Description=Ansible Pull Configuration
+          Description=Run ansible-pull
           After=network.target
 
           [Service]
           Type=oneshot
+          User=ansible
+          Group=ansible
           ExecStart=/usr/bin/ansible-pull --force -U https://github.com/lumpy-custard/Ansible_Provisioning_Test.git -d /opt/ansible-provision -i localhost, provision_rocky/playbook.yml
           WorkingDirectory=/opt/ansible-provision
           StandardOutput=append:/opt/ansible-provision/ansible-pull.log
           StandardError=append:/opt/ansible-provision/ansible-pull.log
+
 
     - name: Create ansible-pull systemd timer
       copy:
