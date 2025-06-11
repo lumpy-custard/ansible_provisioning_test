@@ -43,11 +43,27 @@
       systemd:
         name: sshd
         state: restarted
-
+    
+    - name: Install EPEL 
+      dnf:
+       name: epel-release
+        state: latest
+        
     - name: Install Neofetch
       dnf:
         name: neofetch
-        state: present
+        state: latest
+    
+    - name: Download latest Neofetch script from GitHub
+      get_url:
+        url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
+        dest: /tmp/neofetch
+        mode: '0755'
+
+    - name: Move neofetch to /usr/bin
+      command: mv /tmp/neofetch /usr/bin/neofetch
+      args:
+        creates: /usr/bin/neofetch
 
     - name: Ensure Neofetch runs on login for new user
       lineinfile:
