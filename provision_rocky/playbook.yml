@@ -73,11 +73,18 @@
         group: "{{ new_user }}"
         mode: '0644'
 
-    - name: Create system user 'ansible'
+    - name: Ensure 'ansible' group exists
+      group:
+        name: ansible
+        state: present
+
+    - name: Ensure 'ansible' user exists and is in 'ansible' group
       user:
         name: ansible
         system: yes
         shell: /sbin/nologin
+        groups: ansible
+        append: yes
         create_home: no
 
     - name: Ensure /opt/ansible-provision directory exists
@@ -87,6 +94,9 @@
         owner: ansible
         group: ansible
         mode: '0755'
+
+    - name: Set /opt/ansible-provision as a trusted Git directory (system-wide)
+      command: git config --system --add safe.directory /opt/ansible-provision
 
     - name: Ensure ansible-pull log file exists in /opt
       file:
